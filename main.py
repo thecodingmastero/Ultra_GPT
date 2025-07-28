@@ -7,9 +7,9 @@ app = Flask(__name__, static_folder="static", static_url_path="")
 CORS(app)
 
 # Env vars or defaults
-FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY", "YOUR_DEFAULT_FINNHUB_KEY")
-TWELVE_DATA_API_KEY = os.getenv("TWELVE_DATA_API_KEY", "YOUR_DEFAULT_TWELVE_KEY")
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "YOUR_DEFAULT_OPENROUTER_KEY")
+FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY")
+TWELVE_DATA_API_KEY = os.getenv("TWELVE_DATA_API_KEY")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 FINNHUB_URL = "https://finnhub.io/api/v1/quote"
 TWELVE_DATA_URL = "https://api.twelvedata.com/price"
