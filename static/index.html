@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ultra-GPT Chat + Investing Game</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Ultra-GPT Investing Assistant + Game</h1>
+  </header>
+
+  <main>
+    <!-- Chat Section -->
+    <section id="chat-section" class="panel">
+      <h2>Chat with Ultra-GPT</h2>
+      <div id="chat-box"></div>
+      <div class="input-area">
+        <input id="user-input" type="text" placeholder="Ask me or enter stock symbol (e.g., AAPL)" autocomplete="off" />
+        <button id="send-btn">Send</button>
+        <button id="price-btn">Get Price</button>
+      </div>
+    </section>
+
+    <!-- Game Section -->
+    <section id="game-section" class="panel">
+      <h2>Investing Game</h2>
+      <canvas id="game-canvas" width="800" height="450"></canvas>
+      <div id="game-info">
+        <button id="start-game">Start Game</button>
+        <button id="reset-game">Reset Game</button>
+        <div id="score-display">Score: 0</div>
+        <div id="investment-panel"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
