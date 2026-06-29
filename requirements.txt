@@ -1,4 +1,10 @@
-flask
-flask-cors
-requests
-python-dotenv
+Flask==3.1.1
+Flask-Cors==6.0.1
+Flask-JWT-Extended==4.7.1
+Flask-Migrate==4.1.0
+Flask-SQLAlchemy==3.1.1
+python-dotenv==1.1.0
+requests==2.32.4
+SQLAlchemy==2.0.41
+alembic==1.16.2
+pytest==8.4.1
