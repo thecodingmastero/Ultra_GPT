@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, current_app, jsonify, request
 
 from backend.app.core.dependencies import get_market_data_service
 from backend.app.services.market_data.base import MarketDataProviderError
@@ -15,6 +15,7 @@ def get_quote():
     try:
         quote = get_market_data_service().get_quote(symbol)
     except MarketDataProviderError as exc:
-        return jsonify({"error": str(exc)}), 502
+        current_app.logger.warning("Market quote lookup failed for %s: %s", symbol, exc)
+        return jsonify({"error": "Unable to fetch quote data right now. Check the symbol or market data configuration."}), 502
 
     return jsonify(quote)

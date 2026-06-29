@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, current_app, jsonify, request
 
 from backend.app.core.dependencies import get_portfolio_analyzer
 from backend.app.services.market_data.base import MarketDataProviderError
@@ -14,8 +14,10 @@ def analyze_portfolio():
     try:
         analysis = get_portfolio_analyzer().analyze(holdings)
     except ValueError as exc:
-        return jsonify({"error": str(exc)}), 400
+        current_app.logger.info("Portfolio analysis validation failed: %s", exc)
+        return jsonify({"error": "Invalid portfolio input. Provide at least one symbol and a quantity greater than zero."}), 400
     except MarketDataProviderError as exc:
-        return jsonify({"error": str(exc)}), 502
+        current_app.logger.warning("Portfolio analysis market data failure: %s", exc)
+        return jsonify({"error": "Portfolio analysis is temporarily unavailable because market data could not be fetched."}), 502
 
     return jsonify(analysis)
