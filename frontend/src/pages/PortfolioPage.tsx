@@ -133,8 +133,22 @@ export function PortfolioPage() {
       <section className="two-column-grid">
         <Card title="Portfolio holdings" subtitle="Add, edit, and remove holdings for your educational analysis.">
           <form className="inline-form" onSubmit={submitHolding}>
-            <input className="text-input" placeholder="Ticker" value={symbol} onChange={(event) => setSymbol(event.target.value.toUpperCase())} />
-            <input className="text-input" min={1} step={1} type="number" value={quantity} onChange={(event) => setQuantity(Number(event.target.value))} />
+            <input
+              aria-label="Ticker symbol"
+              className="text-input"
+              placeholder="Ticker"
+              value={symbol}
+              onChange={(event) => setSymbol(event.target.value.toUpperCase())}
+            />
+            <input
+              aria-label="Share quantity"
+              className="text-input"
+              min={1}
+              step={1}
+              type="number"
+              value={quantity}
+              onChange={(event) => setQuantity(Number(event.target.value))}
+            />
             <Button type="submit">{editingId ? 'Update holding' : 'Add holding'}</Button>
           </form>
           {error && <p className="error-text">{error}</p>}

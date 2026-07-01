@@ -61,7 +61,7 @@ export function ProfilePage() {
         {profile && (
           <form className="stack-sm" onSubmit={saveProfile}>
             <p className="muted">Email: {profile.email}</p>
-            <input className="text-input" value={fullName} onChange={(event) => setFullName(event.target.value)} />
+            <input aria-label="Full name" className="text-input" value={fullName} onChange={(event) => setFullName(event.target.value)} />
             <Button type="submit">Save profile</Button>
             {message && <p className="muted">{message}</p>}
           </form>
