@@ -56,3 +56,6 @@ class LessonsRepository:
         progress.completed_at = datetime.now(UTC) if completed else None
         db.session.commit()
         return progress
+
+    def list_progress_for_user(self, user_id: int) -> list[LessonProgress]:
+        return LessonProgress.query.filter_by(user_id=user_id).order_by(LessonProgress.lesson_id.asc()).all()

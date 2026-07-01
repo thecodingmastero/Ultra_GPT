@@ -54,6 +54,7 @@ def concentration_analysis():
             "summary": analysis["summary"],
             "risk_flags": analysis["risk_flags"],
             "top_positions": analysis["positions"][:3],
+            "sector_breakdown": analysis.get("sector_breakdown", []),
             "educational_feedback": analysis["educational_feedback"],
         }
     )

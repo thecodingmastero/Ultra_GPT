@@ -20,6 +20,15 @@ def test_market_quote_returns_company_name_and_price(client):
     assert payload["current_price"] == 200.0
 
 
+def test_market_profile_endpoint_returns_company_metadata(client):
+    response = client.get("/api/market/profile?symbol=AAPL")
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert payload["company_name"] == "AAPL Incorporated"
+    assert payload["finnhub_industry"] == "Technology"
+
+
 def test_portfolio_analysis_returns_weights_and_risk_flags(client):
     response = client.post(
         "/api/portfolio/analyze",
@@ -36,6 +45,7 @@ def test_portfolio_analysis_returns_weights_and_risk_flags(client):
     assert payload["summary"]["position_count"] == 2
     assert payload["positions"][0]["symbol"] == "AAPL"
     assert payload["positions"][0]["weight"] > 0.8
+    assert payload["sector_breakdown"][0]["sector"] == "Technology"
     assert payload["risk_flags"]
 
 
@@ -48,7 +58,7 @@ def test_market_quote_returns_graceful_error_when_provider_fails(client):
         client.application.config["MARKET_DATA_PROVIDER_INSTANCE"] = original_provider
 
     assert response.status_code == 502
-    assert "Unable to fetch quote data right now" in response.get_json()["error"]
+    assert "Unable to fetch market data right now" in response.get_json()["error"]
 
 
 def test_portfolio_analysis_rejects_invalid_input_with_safe_message(client):

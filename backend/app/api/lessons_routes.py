@@ -53,3 +53,23 @@ def track_lesson_progress(lesson_id: int):
             "completed_at": progress.completed_at.isoformat() if progress.completed_at else None,
         }
     )
+
+
+@lessons_bp.get("/progress")
+@auth_required
+def list_lesson_progress():
+    progress_entries = get_lessons_repository().list_progress_for_user(get_current_user_id())
+    completed_lesson_ids = [entry.lesson_id for entry in progress_entries if entry.completed]
+    return jsonify(
+        {
+            "progress": [
+                {
+                    "lesson_id": entry.lesson_id,
+                    "completed": entry.completed,
+                    "completed_at": entry.completed_at.isoformat() if entry.completed_at else None,
+                }
+                for entry in progress_entries
+            ],
+            "completed_lesson_ids": completed_lesson_ids,
+        }
+    )

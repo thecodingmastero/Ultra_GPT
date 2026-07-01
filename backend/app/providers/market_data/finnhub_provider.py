@@ -19,11 +19,20 @@ class FinnhubMarketDataProvider(MarketDataProvider):
             params={**params, "token": self.api_key},
             timeout=10,
         )
+        if response.status_code == 429:
+            raise MarketDataProviderError("Finnhub rate limit reached. Please try again shortly.")
         try:
             response.raise_for_status()
         except requests.RequestException as exc:
             raise MarketDataProviderError("Finnhub request failed.") from exc
-        return response.json()
+        data = response.json()
+        if isinstance(data, dict) and "error" in data:
+            error_text = str(data["error"]).lower()
+            if "api key" in error_text or "token" in error_text:
+                raise MarketDataProviderError("Finnhub API key is invalid or missing.")
+            if "limit" in error_text:
+                raise MarketDataProviderError("Finnhub rate limit reached. Please try again shortly.")
+        return data
 
     def get_quote(self, symbol: str) -> dict:
         data = self._request("quote", {"symbol": symbol})
