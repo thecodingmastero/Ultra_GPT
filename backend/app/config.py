@@ -11,7 +11,7 @@ class Config:
         "DATABASE_URL", f"sqlite:///{BASE_DIR / 'instance' / 'better_investor.db'}"
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    AI_PROVIDER = os.getenv("AI_PROVIDER", "openai")
+    AI_PROVIDER = os.getenv("AI_PROVIDER", "stub")
     MARKET_DATA_PROVIDER = os.getenv("MARKET_DATA_PROVIDER", "finnhub")
     FINNHUB_API_KEY = os.getenv("FINNHUB_API_KEY", "")
     OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")

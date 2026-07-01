@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
-from flask_jwt_extended import get_jwt_identity, jwt_required
 
+from backend.app.core.auth import auth_required, get_current_user_id
 from backend.app.extensions import db
 from backend.app.models import User
 
@@ -8,9 +8,9 @@ account_bp = Blueprint("account", __name__, url_prefix="/api/account")
 
 
 @account_bp.get("/me")
-@jwt_required()
+@auth_required
 def me():
-    user = db.session.get(User, int(get_jwt_identity()))
+    user = db.session.get(User, get_current_user_id())
     if user is None:
         return jsonify({"error": "User not found."}), 404
 
@@ -21,5 +21,6 @@ def me():
             "full_name": user.full_name,
             "saved_portfolios": len(user.portfolios),
             "watchlists": len(user.watchlists),
+            "lesson_progress_entries": len(user.lesson_progress),
         }
     )

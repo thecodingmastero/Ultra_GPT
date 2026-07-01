@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Sequence
 
-from backend.app.services.ai.base import AIProvider
+from backend.app.providers.ai.base import AIProvider
 
 
 class OpenAIProvider(AIProvider):

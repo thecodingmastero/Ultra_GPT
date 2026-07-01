@@ -29,10 +29,10 @@ export function LandingPage() {
             Learn core concepts, explore portfolio trade-offs, and stay grounded in diversification, risk management, and emotional discipline.
           </p>
           <div className="hero__actions">
-            <Link to="/assistant">
+            <Link to="/ask-ai">
               <Button>Try the assistant</Button>
             </Link>
-            <Link to="/portfolio">
+            <Link to="/portfolio-lab">
               <Button variant="secondary">Analyze a portfolio</Button>
             </Link>
           </div>
