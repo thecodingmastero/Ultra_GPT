@@ -44,6 +44,6 @@ class AssistantPolicy:
 
     def finalize(self, response: str) -> str:
         base = response.strip()
-        if "educational" not in base.lower() or "financial advice" not in base.lower():
+        if "educational" not in base.lower() and "financial advice" not in base.lower():
             return f"{base}\n\n{ASSISTANT_DISCLAIMER}"
         return base

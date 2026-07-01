@@ -7,6 +7,8 @@ on:
 
 jobs:
   backend:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,6 +21,8 @@ jobs:
         run: PYTHONPATH=. pytest -q
 
   frontend:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     defaults:
       run:
