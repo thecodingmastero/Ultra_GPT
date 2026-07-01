@@ -20,3 +20,4 @@ class User(db.Model):
     portfolios = relationship("Portfolio", back_populates="user", cascade="all, delete-orphan")
     watchlists = relationship("Watchlist", back_populates="user", cascade="all, delete-orphan")
     chat_sessions = relationship("ChatSession", back_populates="user", cascade="all, delete-orphan")
+    lesson_progress = relationship("LessonProgress", back_populates="user", cascade="all, delete-orphan")

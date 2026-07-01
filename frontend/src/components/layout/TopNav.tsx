@@ -1,13 +1,12 @@
 import { NavLink } from 'react-router-dom'
 
 const primaryLinks = [
-  ['/', 'Home'],
-  ['/assistant', 'Assistant'],
-  ['/portfolio', 'Portfolio'],
-  ['/market', 'Market'],
+  ['/', 'Landing'],
+  ['/dashboard', 'Dashboard'],
+  ['/ask-ai', 'Ask AI'],
+  ['/portfolio-lab', 'Portfolio Lab'],
   ['/learn', 'Learn'],
-  ['/pricing', 'Pricing'],
-  ['/account', 'Account'],
+  ['/profile', 'Profile'],
 ]
 
 export function TopNav() {
