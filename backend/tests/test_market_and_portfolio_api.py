@@ -10,6 +10,9 @@ class BrokenMarketDataProvider(MarketDataProvider):
     def get_company_profile(self, symbol: str) -> dict:
         raise MarketDataProviderError("provider unavailable")
 
+    def get_chart(self, symbol: str, resolution: str = "D", count: int = 30) -> dict:
+        raise MarketDataProviderError("provider unavailable")
+
 
 def test_market_quote_returns_company_name_and_price(client):
     response = client.get("/api/market/quote?symbol=AAPL")

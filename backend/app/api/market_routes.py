@@ -5,6 +5,11 @@ from backend.app.services.market_data.base import MarketDataProviderError
 
 market_bp = Blueprint("market", __name__, url_prefix="/api/market")
 
+_DISCLAIMER = (
+    "The Better Investor is for educational purposes only and "
+    "does not provide personalized financial advice."
+)
+
 
 def _format_market_error_message(exc: MarketDataProviderError) -> str:
     lowered = str(exc).lower()
@@ -48,27 +53,34 @@ def get_quote_by_ticker(ticker: str):
 
 @market_bp.get("/chart/<string:ticker>")
 def get_chart(ticker: str):
-    """Stub chart endpoint — full OHLCV data integration deferred to Phase 2B.
+    """OHLCV candle chart data for a symbol.
 
-    Returns a placeholder response so the frontend can wire up the route now
-    and replace the stub payload once the data provider supports candlestick
-    chart data.
+    Optional query params:
+    - resolution: D (daily, default), W (weekly), M (monthly)
+    - count: number of candles to return (default 30, max 365)
     """
     symbol = ticker.strip().upper()
     if not symbol:
         return jsonify({"error": "A ticker path parameter is required."}), 400
 
-    return jsonify(
-        {
-            "symbol": symbol,
-            "chart_data": [],
-            "message": "Chart data integration is planned for Phase 2B.",
-            "disclaimer": (
-                "The Better Investor is for educational purposes only and "
-                "does not provide personalized financial advice."
-            ),
-        }
-    )
+    resolution = request.args.get("resolution", "D").upper()
+    if resolution not in ("D", "W", "M"):
+        resolution = "D"
+    try:
+        count = max(1, min(365, int(request.args.get("count", 30))))
+    except (TypeError, ValueError):
+        count = 30
+
+    try:
+        chart = get_market_data_service().get_chart(symbol, resolution=resolution, count=count)
+    except MarketDataProviderError as exc:
+        current_app.logger.warning("Chart lookup failed for %s: %s", symbol, exc)
+        return jsonify({"error": _format_market_error_message(exc)}), 502
+
+    return jsonify({
+        **chart,
+        "disclaimer": _DISCLAIMER,
+    })
 
 
 @market_bp.get("/profile")

@@ -3,8 +3,10 @@ import type { FormEvent } from 'react'
 import { Button } from '../components/common/Button'
 import { Card } from '../components/common/Card'
 import { DisclaimerBanner } from '../components/common/DisclaimerBanner'
+import { UpgradePrompt } from '../components/common/UpgradePrompt'
 import { getAuthHeaders } from '../services/auth'
 import { apiRequest } from '../services/http'
+import { fetchUserPlan } from '../services/plan'
 
 type Holding = {
   id: number
@@ -12,11 +14,22 @@ type Holding = {
   quantity: number
 }
 
+type AnalysisSummary = {
+  total_market_value: number
+  position_count: number
+  sector_count: number
+  diversification_score: number
+  volatility_label: string
+  hhi: number
+}
+
+type LearningSuggestion = {
+  lesson_slug: string
+  reason: string
+}
+
 type Concentration = {
-  summary: {
-    total_market_value: number
-    position_count: number
-  }
+  summary: AnalysisSummary
   top_positions: Array<{
     symbol: string
     market_value: number
@@ -28,6 +41,13 @@ type Concentration = {
   }>
   risk_flags: string[]
   educational_feedback: string
+  learning_suggestions?: LearningSuggestion[]
+}
+
+const VOLATILITY_COLORS: Record<string, string> = {
+  low: '#3e9fcd',
+  moderate: '#428ce2',
+  high: '#c0a000',
 }
 
 export function PortfolioPage() {
@@ -38,6 +58,7 @@ export function PortfolioPage() {
   const [analysis, setAnalysis] = useState<Concentration | null>(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [planId, setPlanId] = useState<string>('free')
 
   const loadHoldings = async () => {
     const payload = await apiRequest<{ holdings: Holding[] }>('/api/holdings', {
@@ -54,7 +75,11 @@ export function PortfolioPage() {
       setAnalysis(payload)
     } catch (requestError) {
       setAnalysis(null)
-      setError(requestError instanceof Error ? requestError.message : 'Unable to load concentration analysis.')
+      const msg = requestError instanceof Error ? requestError.message : ''
+      // If 403, user is on free plan — silently suppress
+      if (!msg.includes('not available on your current plan')) {
+        setError(msg || 'Unable to load concentration analysis.')
+      }
     }
   }
 
@@ -63,6 +88,8 @@ export function PortfolioPage() {
       setLoading(true)
       setError('')
       try {
+        const plan = await fetchUserPlan()
+        setPlanId(plan?.plan_id ?? 'free')
         await loadHoldings()
         await loadAnalysis()
       } catch (requestError) {
@@ -127,6 +154,8 @@ export function PortfolioPage() {
     }
   }
 
+  const isPaidPlan = planId !== 'free'
+
   return (
     <div className="page-stack">
       <DisclaimerBanner />
@@ -172,12 +201,30 @@ export function PortfolioPage() {
           </div>
         </Card>
 
-        <Card title="Concentration analysis" subtitle="Sector mix and concentration risk flags">
-          {!analysis && <p className="muted">Add holdings to see an educational concentration analysis.</p>}
-          {analysis && (
+        <Card title="Concentration analysis" subtitle="Sector mix, volatility heuristic, and concentration risk flags">
+          {!isPaidPlan && (
+            <UpgradePrompt message="Full portfolio analytics — including sector breakdown, volatility scoring, and diversification insights — is available on the Single plan ($10/month)." />
+          )}
+          {isPaidPlan && !analysis && (
+            <p className="muted">Add holdings to see an educational concentration analysis.</p>
+          )}
+          {isPaidPlan && analysis && (
             <div className="stack-sm">
               <p>
                 Total market value: <strong>${analysis.summary.total_market_value.toLocaleString()}</strong>
+                {' · '}
+                {analysis.summary.position_count} position{analysis.summary.position_count !== 1 ? 's' : ''}
+                {' · '}
+                {analysis.summary.sector_count} sector{analysis.summary.sector_count !== 1 ? 's' : ''}
+              </p>
+              <p>
+                Diversification score:{' '}
+                <strong>{analysis.summary.diversification_score}%</strong>
+                {' · '}
+                Volatility:{' '}
+                <strong style={{ color: VOLATILITY_COLORS[analysis.summary.volatility_label] ?? '#c0f0f7' }}>
+                  {analysis.summary.volatility_label}
+                </strong>
               </p>
               <div>
                 <h3>Top positions</h3>
@@ -199,15 +246,29 @@ export function PortfolioPage() {
                   ))}
                 </ul>
               </div>
-              <div>
-                <h3>Risk flags</h3>
-                <ul className="feature-list">
-                  {analysis.risk_flags.map((flag) => (
-                    <li key={flag}>{flag}</li>
-                  ))}
-                </ul>
-              </div>
+              {analysis.risk_flags.length > 0 && (
+                <div>
+                  <h3>Risk flags</h3>
+                  <ul className="feature-list">
+                    {analysis.risk_flags.map((flag) => (
+                      <li key={flag}>{flag}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               <p>{analysis.educational_feedback}</p>
+              {analysis.learning_suggestions && analysis.learning_suggestions.length > 0 && (
+                <div>
+                  <h3>Suggested lessons</h3>
+                  <ul className="feature-list">
+                    {analysis.learning_suggestions.map((s) => (
+                      <li key={s.lesson_slug}>
+                        <strong>{s.lesson_slug}</strong>: {s.reason}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
         </Card>

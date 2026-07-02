@@ -1,4 +1,4 @@
-# The Better Investor — Phase 2A Foundation
+# The Better Investor — Phase 3: Production Hardening
 
 **Smarter Investing Starts Here.**
 
@@ -6,7 +6,19 @@ The Better Investor is an education-first investing platform. It helps users lea
 
 > **Educational only:** This product does **not** provide personalized financial advice.
 
-## Phase 2 audit status (current scope)
+## Phase 3 completion status
+
+- [x] **Market Data** — TTL in-memory caching, retry logic, real OHLCV chart endpoint (`GET /api/market/chart/<ticker>`)
+- [x] **Portfolio Analytics** — Volatility heuristic (HHI), diversification score, sector count, learning suggestions
+- [x] **AI Safety Hardening** — Strengthened guardrails: urgency blocking, extended buy/sell directive patterns, refined system prompt
+- [x] **Educational Hub** — `/api/education/progress` now persists progress for authenticated users (was a stub)
+- [x] **Investor Quest** — Quiz submission endpoint (`POST /api/quest/quiz/submit`), milestone badge awarding, challenge catalogue (`GET /api/quest/challenges`), badge `earned_at` timestamps
+- [x] **Subscription Gating** — `PlanEntitlementService` with `Feature` enum, `plan_required` decorator, `/api/account/plan` endpoint
+- [x] **Observability** — Structured log events for assistant requests, market data errors, portfolio failures
+- [x] **Frontend UX** — `UpgradePrompt` component, plan-aware portfolio page, updated Investor Quest with quiz/challenge catalogue and badge display
+- [x] **Tests** — 65 tests (33 pre-existing + 32 new Phase 3 tests covering caching, chart, analytics, guardrails, quiz, badges, entitlements)
+
+## Phase 2 audit status (carried forward)
 
 - [x] AI assistant foundation with educational-first guardrails and wired endpoints
 - [x] Portfolio analysis endpoint and baseline concentration/diversification output
@@ -18,6 +30,7 @@ The Better Investor is an education-first investing platform. It helps users lea
 - [x] Pricing plans represented in backend and UI (Free, Single $10/month, Family, Business)
 - [x] App shell branding/colors/responsive core navigation
 - [x] Modular architecture + passing build/test checks
+
 
 ## Phase 2A Foundation — what was added
 
@@ -41,7 +54,7 @@ Phase 2A establishes modular scaffolding across frontend and backend for the fol
 |---|---|---|
 | `POST` | `/api/assistant/query` | Alias for `/api/assistant/chat` — Phase 2A canonical path |
 | `GET` | `/api/market/quote/<ticker>` | Path-param variant of the quote endpoint |
-| `GET` | `/api/market/chart/<ticker>` | Chart data stub (Phase 2B will add full OHLCV data) |
+| `GET` | `/api/market/chart/<ticker>` | OHLCV candle data via Finnhub (Phase 3: real data, supports `?resolution=D&count=30`) |
 | `GET` | `/api/education/lessons` | Education-prefix lesson list |
 | `POST` | `/api/education/progress` | Generic progress stub |
 | `GET` | `/api/quest/profile` | Fetch (or create) authenticated user's quest profile |
@@ -228,25 +241,54 @@ XP and badges are earned **only** through:
 
 Plain assistant chats do **not** award XP. The quest service is intentionally separated from the assistant event pipeline.
 
-## What remains for later phases
+## Phase 3 additions at a glance
 
-These items are intentionally deferred to keep Phase 2 focused on stable foundational scaffolding, while reserving higher-risk provider integrations and advanced product logic for subsequent phases.
+### New backend files
+| File | Purpose |
+|---|---|
+| `backend/app/services/market_data/cache.py` | Thread-safe TTL cache for market data (quotes, profiles, charts) |
+| `backend/app/core/entitlements.py` | `Feature` enum, `_PLAN_FEATURES` matrix, `plan_required` decorator |
+| `backend/tests/test_phase3.py` | 32 new tests for Phase 3 features |
 
-### Phase 2B (Core Intelligence)
-- Full AI assistant behavioral coaching feedback generation
-- Portfolio analyzer v2 (volatility scoring, diversification metric)
-- Market data: full OHLCV chart data integration
-- Persist `BehaviorEvent` records from assistant/user actions
+### New/updated API endpoints (Phase 3)
+| Method | Path | Description |
+|---|---|---|
+| `GET` | `/api/market/chart/<ticker>` | Real OHLCV candle data from Finnhub `/stock/candle`; supports `?resolution=D&count=30` |
+| `POST` | `/api/quest/quiz/submit` | Submit a quiz with score; XP scales 5–25 based on performance; idempotent |
+| `GET` | `/api/quest/challenges` | Public catalogue of available quizzes and challenges |
+| `GET` | `/api/account/plan` | Returns authenticated user's plan_id and feature entitlement list |
+| `POST` | `/api/education/progress` | Now auth-required and persists via `LessonsRepository` (was stub) |
 
-### Phase 2C (Learning + Gamification)
-- Full quiz engine wired to lessons
-- Investing simulations
-- Achievement tracking and badge awarding logic
-- Investor Quest leaderboard
+### New frontend files
+| File | Purpose |
+|---|---|
+| `frontend/src/services/plan.ts` | Fetches user plan and exposes `planLabel()` helper |
+| `frontend/src/components/common/UpgradePrompt.tsx` | Inline upgrade call-to-action component |
 
-### Phase 2D (Monetization + Hardening)
-- Plan gating (feature flags per subscription tier)
-- Stripe or payment provider integration
-- Performance pass
-- Security hardening pass
-- Mobile responsiveness QA
+## What remains for Phase 4
+
+These items are explicitly deferred:
+
+### Phase 4A (Real-money Integrations)
+- Stripe payment provider integration for Single/Family/Business subscriptions
+- Webhook handling for subscription status changes
+- Invoice/receipt management
+
+### Phase 4B (Advanced Gamification)
+- Interactive quiz engine with real multiple-choice questions per lesson
+- Investing simulation sandbox (paper trading with virtual portfolio)
+- Investor Quest leaderboard (cross-user rankings)
+- Streak tracking and daily learning reminders
+
+### Phase 4C (Data & Observability)
+- `BehaviorEvent` persistence from assistant/user interactions
+- Structured logging to external service (Datadog, Sentry, etc.)
+- Usage analytics dashboard
+- Market data provider redundancy (fallback to alternative if Finnhub unavailable)
+
+### Phase 4D (Social & Compliance)
+- Family multi-profile management UI
+- Team dashboard for Business plan
+- Data export / GDPR compliance tools
+- Accessibility audit (WCAG 2.1 AA)
+

@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, current_app, jsonify, request
 
 from backend.app.core.dependencies import get_assistant_service
 
@@ -15,17 +15,18 @@ def chat():
         return jsonify({"error": "A message is required."}), 400
 
     result = get_assistant_service().chat(message=message, history=history)
+    current_app.logger.info(
+        "assistant.chat blocked=%s signals=%s message_len=%d",
+        result.get("behavioral_signals") != [] or "can\u2019t provide" in result.get("response", ""),
+        result.get("behavioral_signals", []),
+        len(message),
+    )
     return jsonify(result)
 
 
 @assistant_bp.post("/query")
 def query():
-    """Phase 2A alias for /chat that accepts the same payload.
-
-    Kept as a separate route so external integrations can use the canonical
-    /api/ai/assistant/query path described in the Phase 2A spec while the
-    legacy /api/assistant/chat path continues to work.
-    """
+    """Phase 2A/3 alias for /chat that accepts the same payload."""
     data = request.get_json() or {}
     message = data.get("message", "").strip()
     history = data.get("history", [])
@@ -34,4 +35,10 @@ def query():
         return jsonify({"error": "A message is required."}), 400
 
     result = get_assistant_service().chat(message=message, history=history)
+    current_app.logger.info(
+        "assistant.query blocked=%s signals=%s message_len=%d",
+        result.get("behavioral_signals") != [] or "can\u2019t provide" in result.get("response", ""),
+        result.get("behavioral_signals", []),
+        len(message),
+    )
     return jsonify(result)

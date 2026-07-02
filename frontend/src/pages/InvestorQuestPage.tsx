@@ -9,53 +9,100 @@ type QuestProfile = {
   level: number
   xp: number
   xp_to_next_level: number
-  badges: { id: number; name: string; description: string | null }[]
+  badges: { id: number; name: string; description: string | null; earned_at: string }[]
+}
+
+type Challenge = {
+  id: string
+  type: string
+  title: string
+  description: string
+  xp_max: number
+  linked_lesson_slug: string
+}
+
+type QuizResult = {
+  message: string
+  xp_awarded: number
+  score: number
+  new_badges: string[]
+  profile: QuestProfile
 }
 
 export function InvestorQuestPage() {
   const [profile, setProfile] = useState<QuestProfile | null>(null)
+  const [challenges, setChallenges] = useState<Challenge[]>([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
+  const [submitting, setSubmitting] = useState<string | null>(null)
   const [lastResult, setLastResult] = useState('')
+  const [newBadges, setNewBadges] = useState<string[]>([])
 
   useEffect(() => {
-    if (!isAuthenticated()) return
-    const loadProfile = async () => {
+    const loadData = async () => {
       setLoading(true)
       try {
-        const data = await apiRequest<QuestProfile>('/api/quest/profile', {
-          headers: getAuthHeaders(),
-        })
-        setProfile(data)
+        const challengePayload = await apiRequest<{ challenges: Challenge[] }>('/api/quest/challenges')
+        setChallenges(challengePayload.challenges)
+        if (isAuthenticated()) {
+          const profileData = await apiRequest<QuestProfile>('/api/quest/profile', {
+            headers: getAuthHeaders(),
+          })
+          setProfile(profileData)
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unable to load quest profile.')
+        setError(err instanceof Error ? err.message : 'Unable to load Investor Quest data.')
       } finally {
         setLoading(false)
       }
     }
-    void loadProfile()
+    void loadData()
   }, [])
 
-  const submitDemoChallenge = async () => {
+  const submitQuiz = async (quizId: string, score: number) => {
     if (!isAuthenticated()) return
-    setSubmitting(true)
+    setSubmitting(quizId)
     setLastResult('')
+    setNewBadges([])
     try {
-      const data = await apiRequest<{ message: string; xp_awarded: number; profile: QuestProfile }>(
+      const data = await apiRequest<QuizResult>('/api/quest/quiz/submit', {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ quiz_id: quizId, score }),
+      })
+      setProfile(data.profile)
+      setNewBadges(data.new_badges)
+      const xpMsg = data.xp_awarded > 0 ? ` (+${data.xp_awarded} XP)` : ' (already completed)'
+      setLastResult(`${quizId}: ${data.message}${xpMsg} — Score: ${data.score}%`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to submit quiz.')
+    } finally {
+      setSubmitting(null)
+    }
+  }
+
+  const submitChallenge = async (challengeId: string, xpReward: number) => {
+    if (!isAuthenticated()) return
+    setSubmitting(challengeId)
+    setLastResult('')
+    setNewBadges([])
+    try {
+      const data = await apiRequest<{ message: string; xp_awarded: number; new_badges: string[]; profile: QuestProfile }>(
         '/api/quest/challenge/submit',
         {
           method: 'POST',
           headers: getAuthHeaders(),
-          body: JSON.stringify({ challenge_id: 'demo-quiz-1', xp_reward: 10 }),
+          body: JSON.stringify({ challenge_id: challengeId, xp_reward: xpReward }),
         },
       )
       setProfile(data.profile)
-      setLastResult(data.message + (data.xp_awarded > 0 ? ` (+${data.xp_awarded} XP)` : ''))
+      setNewBadges(data.new_badges)
+      const xpMsg = data.xp_awarded > 0 ? ` (+${data.xp_awarded} XP)` : ' (already completed)'
+      setLastResult(`${challengeId}: ${data.message}${xpMsg}`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to submit challenge.')
     } finally {
-      setSubmitting(false)
+      setSubmitting(null)
     }
   }
 
@@ -81,37 +128,60 @@ export function InvestorQuestPage() {
           <div className="stack-sm">
             <p>
               <strong>Level:</strong> {profile.level}
+              {' · '}
+              <strong>XP:</strong> {profile.xp}
+              {' · '}
+              <span className="muted">{profile.xp_to_next_level} XP to next level</span>
             </p>
-            <p>
-              <strong>XP:</strong> {profile.xp} &mdash; {profile.xp_to_next_level} XP to next level
-            </p>
-            <p>
-              <strong>Badges earned:</strong> {profile.badges.length}
-            </p>
+            {newBadges.length > 0 && (
+              <p style={{ color: 'var(--color-accent, #c0f0f7)' }}>
+                🏅 New badge{newBadges.length > 1 ? 's' : ''} earned: {newBadges.join(', ')}!
+              </p>
+            )}
+            {lastResult && <p style={{ color: 'var(--color-brand-light, #3e9fcd)' }}>{lastResult}</p>}
             {profile.badges.length > 0 && (
-              <ul>
-                {profile.badges.map((b) => (
-                  <li key={b.id}>
-                    <strong>{b.name}</strong>
-                    {b.description && ` — ${b.description}`}
-                  </li>
-                ))}
-              </ul>
+              <div>
+                <h3>Badges ({profile.badges.length})</h3>
+                <ul className="feature-list">
+                  {profile.badges.map((b) => (
+                    <li key={b.id}>
+                      <strong>{b.name}</strong>
+                      {b.description && ` — ${b.description}`}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
         )}
       </Card>
 
-      <Card title="Demo Challenge" subtitle="Phase 2A scaffold — full quiz engine coming in Phase 2C">
-        <p className="muted">
-          Complete challenges to earn XP. The full quiz engine, investing simulations, and achievement tracking are
-          planned for Phase 2C.
-        </p>
-        {lastResult && <p style={{ color: 'var(--color-success)' }}>{lastResult}</p>}
-        <Button onClick={() => void submitDemoChallenge()} disabled={submitting}>
-          {submitting ? 'Submitting…' : 'Complete Demo Challenge (+10 XP)'}
-        </Button>
-      </Card>
+      <section className="card-grid">
+        {challenges.map((challenge) => (
+          <Card
+            key={challenge.id}
+            title={challenge.title}
+            subtitle={`${challenge.type === 'quiz' ? 'Quiz' : 'Challenge'} · up to ${challenge.xp_max} XP`}
+          >
+            <p>{challenge.description}</p>
+            <p className="muted">Related lesson: {challenge.linked_lesson_slug}</p>
+            <Button
+              onClick={() =>
+                challenge.type === 'quiz'
+                  ? void submitQuiz(challenge.id, 85) // simulate a high-score submission for demo
+                  : void submitChallenge(challenge.id, challenge.xp_max)
+              }
+              disabled={submitting === challenge.id}
+            >
+              {submitting === challenge.id
+                ? 'Submitting…'
+                : challenge.type === 'quiz'
+                  ? 'Submit Quiz (Demo: 85%)'
+                  : 'Complete Challenge'}
+            </Button>
+          </Card>
+        ))}
+      </section>
     </div>
   )
 }
