@@ -1,4 +1,4 @@
-# The Better Investor — Phase 2A Foundation
+# The Better Investor — Phase 3: Advanced AI & Behavioral Coaching
 
 **Smarter Investing Starts Here.**
 
@@ -6,7 +6,156 @@ The Better Investor is an education-first investing platform. It helps users lea
 
 > **Educational only:** This product does **not** provide personalized financial advice.
 
-## Phase 2 audit status (current scope)
+## Phase 3 status
+
+- [x] Advanced AI assistant with configurable explanation depth (simple / deep)
+- [x] Guardrail/policy layer upgraded with book-based guidance themes
+- [x] Behavioral coaching engine with confidence scores and educational guidance per signal
+- [x] Standalone `/api/assistant/behavioral/analyze` endpoint
+- [x] `policy_metadata` field added to every assistant response
+- [x] `behavioral_coaching` detailed field added (alongside backward-compatible `behavioral_signals`)
+- [x] Structured logging for policy decisions and behavioral signal detections
+- [x] Frontend depth toggle (Simple / Deep Dive) on AI assistant page
+- [x] Frontend behavioral coaching cards displayed inline with AI responses
+- [x] Phase 3 tests (10 new test cases covering depth, behavioral API, and policy metadata)
+
+## Phase 3 — what was added
+
+### Backend: guardrail / policy layer (`backend/app/policies/guardrails.py`)
+
+`AssistantPolicy` is a stateless, reusable middleware-style service (not hardcoded in route handlers):
+
+- **Explanation depth support**: `get_system_prompt(depth)` returns a `"simple"` or `"deep"` system prompt.
+- **Book-based guidance themes**: both system prompts embed educational themes from *A Random Walk Down Wall Street* (Malkiel) and *The 5 Mistakes Every Investor Makes* (Hanson):
+  - Long-term perspective
+  - Diversification
+  - Low-cost index funds
+  - Emotional discipline (panic selling, FOMO, overconfidence)
+  - Avoiding market timing
+- **`finalize()` now returns `(text, disclaimer_appended: bool)`** for audit logging.
+- **Structured logging**: every policy block and pass is logged with `policy_block` / `policy_pass` log events.
+- **`PolicyMetadata` dataclass** carries block status, depth, disclaimer flag, reason, and detected flags.
+
+### Backend: behavioral coaching engine (`backend/app/services/behavioral/signals.py`)
+
+`BehavioralSignalService` now provides two methods:
+
+| Method | Returns | Notes |
+|---|---|---|
+| `detect_signals(message)` | `list[str]` | Signal names only — backward-compatible with Phase 2 |
+| `analyze(message)` | `list[BehavioralSignal]` | Full detail: signal, confidence (0–1), coaching text, matched phrases |
+
+Signals detected:
+
+| Signal | Confidence | Trigger phrases |
+|---|---|---|
+| `panic_selling` | 0.85 | "panic sell", "sell everything", "market is crashing" |
+| `fomo` | 0.80 | "fomo", "missing out", "everyone is buying" |
+| `overconfidence` | 0.80 | "can't lose", "sure winner", "easy money" |
+| `chasing_hot_stocks` | 0.75 | "hot stock", "meme stock", "to the moon" |
+| `lack_of_diversification` | 0.90 | "all in", "one stock", "single stock portfolio" |
+
+Confidence receives a small bonus when multiple trigger phrases are matched in the same message. Every detection is logged with `behavioral_signal_detected`.
+
+### Backend: assistant service (`backend/app/services/ai/service.py`)
+
+`AssistantService.chat()` now accepts:
+
+| Parameter | Type | Default | Notes |
+|---|---|---|---|
+| `message` | `str` | required | User question or statement |
+| `history` | `list[dict]` | `[]` | Prior conversation turns |
+| `depth` | `str` | `"simple"` | `"simple"` or `"deep"` |
+
+Response shape (all fields present):
+
+```json
+{
+  "response": "...",
+  "disclaimer": "The Better Investor is for educational purposes only...",
+  "behavioral_signals": ["fomo", "overconfidence"],
+  "behavioral_coaching": [
+    {
+      "signal": "fomo",
+      "confidence": 0.83,
+      "coaching": "Fear of missing out is one of the most common reasons..."
+    }
+  ],
+  "policy_metadata": {
+    "blocked": false,
+    "depth": "simple",
+    "disclaimer_appended": true,
+    "block_reason": null,
+    "flags": []
+  }
+}
+```
+
+### New API endpoints (Phase 3)
+
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/api/assistant/chat` | *(extended)* now accepts optional `depth` field (`"simple"` / `"deep"`) |
+| `POST` | `/api/assistant/query` | *(extended)* same as `/chat` |
+| `POST` | `/api/assistant/behavioral/analyze` | Standalone behavioral analysis — returns signals with confidence and coaching |
+
+#### `/api/assistant/chat` — updated request body
+
+```json
+{
+  "message": "I have FOMO and everyone is buying this hot stock.",
+  "history": [],
+  "depth": "deep"
+}
+```
+
+`depth` defaults to `"simple"` if omitted. Returns HTTP 400 for unrecognised values.
+
+#### `/api/assistant/behavioral/analyze`
+
+Request:
+```json
+{ "message": "I want to go all in on a meme stock." }
+```
+
+Response:
+```json
+{
+  "signals": [
+    {
+      "signal": "lack_of_diversification",
+      "confidence": 0.90,
+      "coaching": "Concentrating a portfolio in a single stock or sector..."
+    }
+  ],
+  "signal_names": ["lack_of_diversification"],
+  "analyzed": true
+}
+```
+
+### Frontend changes
+
+| File | What changed |
+|---|---|
+| `frontend/src/pages/AssistantPage.tsx` | Added depth toggle (Simple / Deep Dive), behavioral coaching section below AI responses, updated `ChatResponse` type to include `behavioral_coaching` and `policy_metadata` |
+| `frontend/src/components/common/BehavioralCoachingCard.tsx` | New component: renders a coaching card per detected signal (signal label, confidence %, coaching text) |
+| `frontend/src/theme/global.css` | Added `.depth-toggle`, `.coaching-card`, `.coaching-section` CSS classes |
+
+### Observability
+
+All policy decisions and behavioral signals emit structured log records via Python's standard `logging` module:
+
+| Logger | Event | Fields |
+|---|---|---|
+| `backend.app.policies.guardrails` | `policy_block` | `reason`, `message_preview` |
+| `backend.app.policies.guardrails` | `policy_pass` | `message_preview` |
+| `backend.app.services.behavioral.signals` | `behavioral_signal_detected` | `signal`, `confidence`, `match_count` |
+
+No secrets or PII are logged; `message_preview` is truncated to 120 characters.
+
+---
+
+## Phase 2 audit status
 
 - [x] AI assistant foundation with educational-first guardrails and wired endpoints
 - [x] Portfolio analysis endpoint and baseline concentration/diversification output
@@ -19,7 +168,7 @@ The Better Investor is an education-first investing platform. It helps users lea
 - [x] App shell branding/colors/responsive core navigation
 - [x] Modular architecture + passing build/test checks
 
-## Phase 2A Foundation — what was added
+
 
 Phase 2A establishes modular scaffolding across frontend and backend for the following domains:
 

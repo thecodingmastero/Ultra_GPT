@@ -224,6 +224,93 @@ li {
   color: var(--color-success);
 }
 
+/* ---------------------------------------------------------
+   Phase 3: Depth toggle
+   --------------------------------------------------------- */
+
+.depth-toggle {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.depth-toggle__label {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  align-self: center;
+  margin-right: 0.25rem;
+}
+
+.depth-toggle__btn {
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+  transition: 0.18s ease;
+}
+
+.depth-toggle__btn--active {
+  border-color: var(--color-primary);
+  background: rgba(62, 159, 205, 0.18);
+  color: var(--color-accent-light);
+}
+
+/* ---------------------------------------------------------
+   Phase 3: Behavioral coaching cards
+   --------------------------------------------------------- */
+
+.coaching-section {
+  margin-top: 1rem;
+}
+
+.coaching-section__title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.5rem;
+}
+
+.coaching-card {
+  padding: 0.9rem 1rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 200, 80, 0.3);
+  background: rgba(255, 200, 80, 0.07);
+  margin-bottom: 0.6rem;
+}
+
+.coaching-card__header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.coaching-card__signal {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #ffd966;
+}
+
+.coaching-card__confidence {
+  font-size: 0.7rem;
+  color: var(--color-muted);
+  margin-left: auto;
+}
+
+.coaching-card__text {
+  font-size: 0.85rem;
+  color: var(--color-text);
+  line-height: 1.55;
+  margin: 0;
+}
+
 @media (max-width: 780px) {
   .app-shell {
     padding: 1rem;
