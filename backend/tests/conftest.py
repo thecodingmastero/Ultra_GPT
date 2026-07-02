@@ -33,7 +33,8 @@ class FakeMarketDataProvider(MarketDataProvider):
         return prices[symbol]
 
     def get_company_profile(self, symbol: str) -> dict:
-        return {"symbol": symbol, "company_name": f"{symbol} Incorporated"}
+        industries = {"AAPL": "Technology", "MSFT": "Technology", "VOO": "ETF"}
+        return {"symbol": symbol, "company_name": f"{symbol} Incorporated", "finnhub_industry": industries.get(symbol, "")}
 
 
 @pytest.fixture()

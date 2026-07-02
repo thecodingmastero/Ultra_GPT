@@ -20,3 +20,15 @@ def test_register_login_and_me(client):
     me_response = client.get("/api/account/me", headers={"Authorization": "Bearer " + token})
     assert me_response.status_code == 200
     assert me_response.get_json()["full_name"] == "Ada Investor"
+
+    update_response = client.put(
+        "/api/account/me",
+        json={"full_name": "Ada Long Term"},
+        headers={"Authorization": "Bearer " + token},
+    )
+    assert update_response.status_code == 200
+    assert update_response.get_json()["full_name"] == "Ada Long Term"
+
+    logout_response = client.post("/api/auth/logout")
+    assert logout_response.status_code == 200
+    assert logout_response.get_json()["logged_out"] is True

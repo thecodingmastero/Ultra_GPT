@@ -1,4 +1,6 @@
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
+import { clearAuthToken, isAuthenticated } from '../../services/auth'
+import { Button } from '../common/Button'
 
 const primaryLinks = [
   ['/', 'Landing'],
@@ -10,6 +12,17 @@ const primaryLinks = [
 ]
 
 export function TopNav() {
+  const navigate = useNavigate()
+  const loggedIn = isAuthenticated()
+
+  const logout = () => {
+    clearAuthToken()
+    void fetch(`${import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:5000'}/api/auth/logout`, {
+      method: 'POST',
+    }).catch(() => undefined)
+    navigate('/login')
+  }
+
   return (
     <header className="top-nav">
       <div>
@@ -22,9 +35,20 @@ export function TopNav() {
             {label}
           </NavLink>
         ))}
-        <NavLink to="/login" className="nav-link">
-          Login
-        </NavLink>
+        {loggedIn ? (
+          <Button variant="secondary" onClick={logout}>
+            Logout
+          </Button>
+        ) : (
+          <>
+            <NavLink to="/login" className="nav-link">
+              Login
+            </NavLink>
+            <NavLink to="/register" className="nav-link">
+              Register
+            </NavLink>
+          </>
+        )}
       </nav>
     </header>
   )

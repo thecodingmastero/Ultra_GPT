@@ -29,6 +29,7 @@ def test_holdings_crud_and_concentration_analysis(client):
     assert concentration_response.status_code == 200
     payload = concentration_response.get_json()
     assert payload["summary"]["position_count"] == 1
+    assert payload["sector_breakdown"]
     assert payload["risk_flags"]
 
     delete_response = client.delete(f"/api/holdings/{holding_id}", headers=headers)
@@ -52,3 +53,7 @@ def test_lessons_listing_detail_and_progress_tracking(client):
     progress_response = client.post(f"/api/lessons/{first_lesson_id}/progress", json={"completed": True}, headers=headers)
     assert progress_response.status_code == 200
     assert progress_response.get_json()["completed"] is True
+
+    progress_list_response = client.get("/api/lessons/progress", headers=headers)
+    assert progress_list_response.status_code == 200
+    assert first_lesson_id in progress_list_response.get_json()["completed_lesson_ids"]

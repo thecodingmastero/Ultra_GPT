@@ -17,6 +17,13 @@ def test_assistant_blocks_guaranteed_return_prompts(client):
     assert "guaranteed-return claims" in response.get_json()["response"]
 
 
+def test_assistant_blocks_directive_patterns_like_all_in(client):
+    response = client.post("/api/assistant/chat", json={"message": "Should I go all in on one hot stock for a sure profit?"})
+
+    assert response.status_code == 200
+    assert "can’t provide direct buy/sell instructions" in response.get_json()["response"]
+
+
 def test_assistant_uses_provider_for_educational_questions(client):
     response = client.post(
         "/api/assistant/chat",

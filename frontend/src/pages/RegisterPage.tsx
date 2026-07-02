@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '../components/common/Button'
 import { Card } from '../components/common/Card'
+import { setAuthToken } from '../services/auth'
 import { apiRequest } from '../services/http'
 
 type AuthResponse = {
@@ -13,6 +15,7 @@ type AuthResponse = {
 }
 
 export function RegisterPage() {
+  const navigate = useNavigate()
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -25,8 +28,9 @@ export function RegisterPage() {
         method: 'POST',
         body: JSON.stringify({ full_name: fullName, email, password }),
       })
-      localStorage.setItem('better-investor-token', payload.token)
+      setAuthToken(payload.token)
       setMessage(`Account created for ${payload.user.full_name}.`)
+      navigate('/dashboard')
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Registration failed.')
     }

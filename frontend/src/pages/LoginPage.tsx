@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '../components/common/Button'
 import { Card } from '../components/common/Card'
+import { setAuthToken } from '../services/auth'
 import { apiRequest } from '../services/http'
 
 type AuthResponse = {
@@ -13,6 +15,7 @@ type AuthResponse = {
 }
 
 export function LoginPage() {
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
@@ -24,8 +27,9 @@ export function LoginPage() {
         method: 'POST',
         body: JSON.stringify({ email, password }),
       })
-      localStorage.setItem('better-investor-token', payload.token)
+      setAuthToken(payload.token)
       setMessage(`Welcome back, ${payload.user.full_name}.`)
+      navigate('/dashboard')
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Login failed.')
     }

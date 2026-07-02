@@ -51,3 +51,8 @@ def login():
             "user": {"id": user.id, "email": user.email, "full_name": user.full_name},
         }
     )
+
+
+@auth_bp.post("/logout")
+def logout():
+    return jsonify({"logged_out": True})
