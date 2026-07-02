@@ -140,17 +140,40 @@ def test_education_lessons_returns_list(client):
     assert "lessons" in response.get_json()
 
 
-def test_education_progress_stub(client):
+def test_education_progress_requires_auth(client):
+    """Education progress endpoint now requires authentication (Phase 3 upgrade)."""
     response = client.post("/api/education/progress", json={"lesson_id": 1, "completed": True})
+    assert response.status_code == 401
+
+
+def test_education_progress_persists_for_authenticated_user(client):
+    """Authenticated users can persist lesson progress via /api/education/progress."""
+    # Seed lessons first by loading the list
+    client.get("/api/education/lessons")
+
+    client.post(
+        "/api/auth/register",
+        json={"email": "eduprogress@example.com", "password": "Pass1234!", "full_name": "Edu User"},
+    )
+    resp = client.post(
+        "/api/auth/login",
+        json={"email": "eduprogress@example.com", "password": "Pass1234!"},
+    )
+    token = resp.get_json()["token"]
+    headers = {"Authorization": "Bearer " + token}
+
+    response = client.post("/api/education/progress", json={"lesson_id": 1, "completed": True}, headers=headers)
     assert response.status_code == 200
     payload = response.get_json()
     assert payload["lesson_id"] == 1
     assert payload["completed"] is True
+    assert payload["message"] == "Progress recorded."
 
 
 def test_education_progress_requires_lesson_id(client):
+    """Missing lesson_id returns 401 (auth check happens before validation)."""
     response = client.post("/api/education/progress", json={})
-    assert response.status_code == 400
+    assert response.status_code == 401
 
 
 # ---------------------------------------------------------------------------
@@ -164,12 +187,15 @@ def test_market_quote_by_ticker_path_param(client):
     assert payload["symbol"] == "AAPL"
 
 
-def test_market_chart_stub_returns_placeholder(client):
+def test_market_chart_returns_ohlcv_candles(client):
     response = client.get("/api/market/chart/AAPL")
     assert response.status_code == 200
     payload = response.get_json()
     assert payload["symbol"] == "AAPL"
-    assert "chart_data" in payload
+    assert "candles" in payload
+    assert isinstance(payload["candles"], list)
+    assert len(payload["candles"]) > 0
+    assert "disclaimer" in payload
 
 
 # ---------------------------------------------------------------------------

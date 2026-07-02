@@ -1,6 +1,7 @@
 from flask import Blueprint, jsonify, request
 
 from backend.app.core.auth import auth_required, get_current_user_id
+from backend.app.core.entitlements import Feature, _PLAN_FEATURES, get_user_plan_id
 from backend.app.extensions import db
 from backend.app.models import User
 
@@ -50,3 +51,16 @@ def update_me():
     db.session.commit()
 
     return jsonify(_serialize_account(user))
+
+
+@account_bp.get("/plan")
+@auth_required
+def get_plan():
+    """Return the authenticated user's active subscription plan and feature entitlements."""
+    user_id = get_current_user_id()
+    plan_id = get_user_plan_id(user_id)
+    features = [f.value for f in _PLAN_FEATURES.get(plan_id, set())]
+    return jsonify({
+        "plan_id": plan_id,
+        "features": sorted(features),
+    })

@@ -239,3 +239,32 @@ li {
     justify-content: flex-start;
   }
 }
+
+/* ---- Upgrade prompt ---- */
+.upgrade-prompt {
+  background: rgba(192, 240, 247, 0.08);
+  border: 1px solid var(--color-accent, #c0f0f7);
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.upgrade-prompt__message {
+  color: var(--color-text, #e0e0e0);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.upgrade-prompt__link {
+  color: var(--color-accent, #c0f0f7);
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.upgrade-prompt__link:hover {
+  text-decoration: underline;
+}
