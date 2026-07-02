@@ -5,11 +5,6 @@ from backend.app.core.dependencies import get_assistant_service
 assistant_bp = Blueprint("assistant", __name__, url_prefix="/api/assistant")
 
 
-def _run_chat(message: str, history: list) -> tuple[dict, int]:
-    result = get_assistant_service().chat(message=message, history=history)
-    return result, 200
-
-
 @assistant_bp.post("/chat")
 def chat():
     data = request.get_json() or {}

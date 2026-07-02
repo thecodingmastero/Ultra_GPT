@@ -10,7 +10,7 @@ const primaryLinks = [
   ['/market', 'Market'],
   ['/learn', 'Learn'],
   ['/quest', 'Investor Quest'],
-  ['/pricing', 'Billing'],
+  ['/billing', 'Billing'],
   ['/profile', 'Account'],
 ]
 
