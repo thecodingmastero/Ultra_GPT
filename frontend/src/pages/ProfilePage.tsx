@@ -12,6 +12,7 @@ type Profile = {
   saved_portfolios: number
   watchlists: number
   lesson_progress_entries: number
+  achievements: number
 }
 
 export function ProfilePage() {
@@ -72,6 +73,7 @@ export function ProfilePage() {
           <li>Saved portfolios: {profile?.saved_portfolios ?? 0}</li>
           <li>Watchlists: {profile?.watchlists ?? 0}</li>
           <li>Lesson progress entries: {profile?.lesson_progress_entries ?? 0}</li>
+          <li>Achievements: {profile?.achievements ?? 0}</li>
         </ul>
       </Card>
     </section>

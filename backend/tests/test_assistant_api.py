@@ -21,7 +21,10 @@ def test_assistant_blocks_directive_patterns_like_all_in(client):
     response = client.post("/api/assistant/chat", json={"message": "Should I go all in on one hot stock for a sure profit?"})
 
     assert response.status_code == 200
-    assert "can’t provide direct buy/sell instructions" in response.get_json()["response"]
+    payload = response.get_json()
+    assert "can’t provide direct buy/sell instructions" in payload["response"]
+    assert "lack_of_diversification" in payload["behavioral_signals"]
+    assert "chasing_hot_stocks" in payload["behavioral_signals"]
 
 
 def test_assistant_uses_provider_for_educational_questions(client):
@@ -31,4 +34,18 @@ def test_assistant_uses_provider_for_educational_questions(client):
     )
 
     assert response.status_code == 200
-    assert "diversification" in response.get_json()["response"].lower()
+    payload = response.get_json()
+    assert "diversification" in payload["response"].lower()
+    assert payload["behavioral_signals"] == []
+
+
+def test_assistant_detects_behavioral_signals(client):
+    response = client.post(
+        "/api/assistant/chat",
+        json={"message": "I have FOMO and feel this is easy money that can't lose."},
+    )
+
+    assert response.status_code == 200
+    payload = response.get_json()
+    assert "fomo" in payload["behavioral_signals"]
+    assert "overconfidence" in payload["behavioral_signals"]

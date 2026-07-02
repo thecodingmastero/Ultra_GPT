@@ -6,6 +6,19 @@ The Better Investor is an education-first investing platform. It helps users lea
 
 > **Educational only:** This product does **not** provide personalized financial advice.
 
+## Phase 2 audit status (current scope)
+
+- [x] AI assistant foundation with educational-first guardrails and wired endpoints
+- [x] Portfolio analysis endpoint and baseline concentration/diversification output
+- [x] Market quote + chart contract endpoints for major US symbols/ETFs
+- [x] Educational hub lesson/progress endpoints
+- [x] Behavioral coaching scaffolding (signal detector service hook in assistant flow)
+- [x] Investor Quest routes/module scaffolding with explicit no-chat-XP rule
+- [x] User/account foundations: profile, saved portfolios, watchlist routes, lesson progress, achievement counters
+- [x] Pricing plans represented in backend and UI (Free, Single $10/month, Family, Business)
+- [x] App shell branding/colors/responsive core navigation
+- [x] Modular architecture + passing build/test checks
+
 ## Phase 2A Foundation — what was added
 
 Phase 2A establishes modular scaffolding across frontend and backend for the following domains:
@@ -33,6 +46,9 @@ Phase 2A establishes modular scaffolding across frontend and backend for the fol
 | `POST` | `/api/education/progress` | Generic progress stub |
 | `GET` | `/api/quest/profile` | Fetch (or create) authenticated user's quest profile |
 | `POST` | `/api/quest/challenge/submit` | Submit a completed challenge and earn XP |
+| `GET` | `/api/watchlist/items` | List authenticated user's saved watchlist symbols |
+| `POST` | `/api/watchlist/items` | Add a symbol to the authenticated user's watchlist |
+| `DELETE` | `/api/watchlist/items/<id>` | Remove a symbol from the authenticated user's watchlist |
 | `GET` | `/api/billing/plans` | Return all available subscription plan definitions |
 
 ### New frontend routes / pages
@@ -165,6 +181,11 @@ Frontend runs at `http://127.0.0.1:5173`.
 ### Billing
 - `GET /api/billing/plans` *(Phase 2A)*
 
+### Watchlist
+- `GET /api/watchlist/items` (auth)
+- `POST /api/watchlist/items` (auth)
+- `DELETE /api/watchlist/items/<id>` (auth)
+
 ## Environment and data notes
 
 - Default local DB is SQLite (`sqlite:///instance/better_investor.db`).
@@ -209,11 +230,13 @@ Plain assistant chats do **not** award XP. The quest service is intentionally se
 
 ## What remains for later phases
 
+These items are intentionally deferred to keep Phase 2 focused on stable foundational scaffolding, while reserving higher-risk provider integrations and advanced product logic for subsequent phases.
+
 ### Phase 2B (Core Intelligence)
-- Full AI assistant behavioral coaching integration
+- Full AI assistant behavioral coaching feedback generation
 - Portfolio analyzer v2 (volatility scoring, diversification metric)
 - Market data: full OHLCV chart data integration
-- `BehaviorEvent` detection and recording pipeline
+- Persist `BehaviorEvent` records from assistant/user actions
 
 ### Phase 2C (Learning + Gamification)
 - Full quiz engine wired to lessons
