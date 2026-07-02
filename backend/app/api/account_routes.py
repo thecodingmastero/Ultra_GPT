@@ -7,6 +7,23 @@ from backend.app.models import User
 account_bp = Blueprint("account", __name__, url_prefix="/api/account")
 
 
+def _serialize_account(user: User) -> dict:
+    watchlist_item_count = len(user.watchlist_items)
+    watchlist_count = len(user.watchlists)
+    if watchlist_count == 0 and watchlist_item_count > 0:
+        watchlist_count = 1
+    return {
+        "id": user.id,
+        "email": user.email,
+        "full_name": user.full_name,
+        "saved_portfolios": len(user.portfolios),
+        "watchlists": watchlist_count,
+        "watchlist_items": watchlist_item_count,
+        "lesson_progress_entries": len(user.lesson_progress),
+        "achievements": len(user.quest_profile.badges) if user.quest_profile else 0,
+    }
+
+
 @account_bp.get("/me")
 @auth_required
 def me():
@@ -14,17 +31,7 @@ def me():
     if user is None:
         return jsonify({"error": "User not found."}), 404
 
-    return jsonify(
-        {
-            "id": user.id,
-            "email": user.email,
-            "full_name": user.full_name,
-            "saved_portfolios": len(user.portfolios),
-            "watchlists": len(user.watchlist_items),
-            "lesson_progress_entries": len(user.lesson_progress),
-            "achievements": len(user.quest_profile.badges) if user.quest_profile else 0,
-        }
-    )
+    return jsonify(_serialize_account(user))
 
 
 @account_bp.put("/me")
@@ -42,14 +49,4 @@ def update_me():
     user.full_name = full_name
     db.session.commit()
 
-    return jsonify(
-        {
-            "id": user.id,
-            "email": user.email,
-            "full_name": user.full_name,
-            "saved_portfolios": len(user.portfolios),
-            "watchlists": len(user.watchlist_items),
-            "lesson_progress_entries": len(user.lesson_progress),
-            "achievements": len(user.quest_profile.badges) if user.quest_profile else 0,
-        }
-    )
+    return jsonify(_serialize_account(user))

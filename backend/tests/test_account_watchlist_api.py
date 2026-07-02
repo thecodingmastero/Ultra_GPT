@@ -16,6 +16,11 @@ def test_watchlist_items_crud(client):
 
     create_response = client.post("/api/watchlist/items", json={"symbol": "AAPL"}, headers=headers)
     assert create_response.status_code == 201
+    assert create_response.get_json()["created"] is True
+
+    duplicate_response = client.post("/api/watchlist/items", json={"symbol": "AAPL"}, headers=headers)
+    assert duplicate_response.status_code == 200
+    assert duplicate_response.get_json()["created"] is False
 
     list_response = client.get("/api/watchlist/items", headers=headers)
     assert list_response.status_code == 200
@@ -38,4 +43,5 @@ def test_account_me_includes_watchlist_and_achievement_counters(client):
     assert account_response.status_code == 200
     payload = account_response.get_json()
     assert payload["watchlists"] == 1
+    assert payload["watchlist_items"] == 1
     assert payload["achievements"] == 0

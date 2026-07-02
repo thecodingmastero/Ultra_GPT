@@ -116,8 +116,15 @@ def test_assistant_chat_does_not_award_quest_xp(client):
     profile_before = client.get("/api/quest/profile", headers=headers).get_json()
     assert profile_before["xp"] == 0
 
-    assistant_response = client.post("/api/assistant/chat", json={"message": "What is diversification?"})
+    assistant_response = client.post(
+        "/api/assistant/chat",
+        json={"message": "What is diversification?"},
+        headers=headers,
+    )
     assert assistant_response.status_code == 200
+    assistant_payload = assistant_response.get_json()
+    assert "response" in assistant_payload
+    assert isinstance(assistant_payload["behavioral_signals"], list)
 
     profile_after = client.get("/api/quest/profile", headers=headers).get_json()
     assert profile_after["xp"] == 0

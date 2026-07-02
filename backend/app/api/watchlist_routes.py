@@ -32,12 +32,12 @@ def add_watchlist_item():
 
     existing = WatchlistItem.query.filter_by(user_id=get_current_user_id(), symbol=symbol).first()
     if existing is not None:
-        return jsonify(_serialize(existing))
+        return jsonify({**_serialize(existing), "created": False})
 
     item = WatchlistItem(user_id=get_current_user_id(), symbol=symbol)
     db.session.add(item)
     db.session.commit()
-    return jsonify(_serialize(item)), 201
+    return jsonify({**_serialize(item), "created": True}), 201
 
 
 @watchlist_bp.delete("/items/<int:item_id>")
