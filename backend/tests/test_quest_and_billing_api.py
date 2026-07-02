@@ -109,6 +109,20 @@ def test_quest_challenge_submit_requires_challenge_id(client):
     assert response.status_code == 400
 
 
+def test_assistant_chat_does_not_award_quest_xp(client):
+    token = _register_and_login(client)
+    headers = {"Authorization": "Bearer " + token}
+
+    profile_before = client.get("/api/quest/profile", headers=headers).get_json()
+    assert profile_before["xp"] == 0
+
+    assistant_response = client.post("/api/assistant/chat", json={"message": "What is diversification?"})
+    assert assistant_response.status_code == 200
+
+    profile_after = client.get("/api/quest/profile", headers=headers).get_json()
+    assert profile_after["xp"] == 0
+
+
 # ---------------------------------------------------------------------------
 # Education routes
 # ---------------------------------------------------------------------------

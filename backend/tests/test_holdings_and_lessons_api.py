@@ -44,6 +44,18 @@ def test_lessons_listing_detail_and_progress_tracking(client):
     assert lessons_response.status_code == 200
     lessons = lessons_response.get_json()["lessons"]
     assert lessons
+    lesson_topics = {lesson["topic"] for lesson in lessons}
+    assert {
+        "Stocks",
+        "ETFs",
+        "Index Funds",
+        "Bonds",
+        "Diversification",
+        "Risk Management",
+        "Compound Growth",
+        "Dollar-Cost Averaging",
+        "Behavioral Finance",
+    }.issubset(lesson_topics)
 
     first_lesson_id = lessons[0]["id"]
     detail_response = client.get(f"/api/lessons/{first_lesson_id}")

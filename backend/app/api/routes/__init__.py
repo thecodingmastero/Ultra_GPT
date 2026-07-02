@@ -8,6 +8,7 @@ from backend.app.api.lessons_routes import lessons_bp
 from backend.app.api.market_routes import market_bp
 from backend.app.api.portfolio_routes import portfolio_bp
 from backend.app.api.quest_routes import quest_bp
+from backend.app.api.watchlist_routes import watchlist_bp
 
 BLUEPRINTS = [
     health_bp,
@@ -19,5 +20,6 @@ BLUEPRINTS = [
     lessons_bp,
     education_bp,
     quest_bp,
+    watchlist_bp,
     billing_bp,
 ]

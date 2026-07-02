@@ -20,8 +20,9 @@ def me():
             "email": user.email,
             "full_name": user.full_name,
             "saved_portfolios": len(user.portfolios),
-            "watchlists": len(user.watchlists),
+            "watchlists": len(user.watchlist_items),
             "lesson_progress_entries": len(user.lesson_progress),
+            "achievements": len(user.quest_profile.badges) if user.quest_profile else 0,
         }
     )
 
@@ -47,7 +48,8 @@ def update_me():
             "email": user.email,
             "full_name": user.full_name,
             "saved_portfolios": len(user.portfolios),
-            "watchlists": len(user.watchlists),
+            "watchlists": len(user.watchlist_items),
             "lesson_progress_entries": len(user.lesson_progress),
+            "achievements": len(user.quest_profile.badges) if user.quest_profile else 0,
         }
     )
