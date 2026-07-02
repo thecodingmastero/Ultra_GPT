@@ -7,7 +7,23 @@ from flask import Flask
 from backend.app.api import BLUEPRINTS
 from backend.app.config import Config
 from backend.app.extensions import cors, db, jwt, migrate
-from backend.app.models import ChatMessage, ChatSession, Holding, Lesson, LessonProgress, Portfolio, User, Watchlist  # noqa: F401
+from backend.app.models import (  # noqa: F401
+    Badge,
+    BehaviorEvent,
+    ChallengeProgress,
+    ChatMessage,
+    ChatSession,
+    Holding,
+    Lesson,
+    LessonProgress,
+    Portfolio,
+    QuestProfile,
+    SubscriptionPlan,
+    SubscriptionStatus,
+    User,
+    Watchlist,
+    WatchlistItem,
+)
 
 
 def create_app(config_object: type[Config] = Config) -> Flask:
