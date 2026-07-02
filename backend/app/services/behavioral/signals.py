@@ -139,7 +139,8 @@ class BehavioralSignalService:
                         signal=name,
                         confidence=score,
                         coaching=defn.coaching,
-                        matches=[m if isinstance(m, str) else m[0] for m in found],
+                        # findall with a single capturing group always returns list[str]
+                        matches=list(found),
                     )
                 )
                 logger.info(

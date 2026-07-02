@@ -122,7 +122,7 @@ class AssistantPolicy:
     # Keep the legacy attribute for any code that reads it directly
     system_prompt: str = _SYSTEM_PROMPT_SIMPLE
 
-    def get_system_prompt(self, depth: str = "simple") -> str:
+    def get_system_prompt(self, depth: ExplainDepth = "simple") -> str:
         """Return the system prompt appropriate for the requested explanation depth."""
         return _SYSTEM_PROMPTS.get(depth, _SYSTEM_PROMPT_SIMPLE)
 
