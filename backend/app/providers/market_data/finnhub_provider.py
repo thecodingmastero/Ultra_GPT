@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import time
 
 import requests
@@ -71,7 +72,6 @@ class FinnhubMarketDataProvider(MarketDataProvider):
 
     def get_chart(self, symbol: str, resolution: str = "D", count: int = 30) -> dict:
         """Return OHLCV daily candles for *symbol* from Finnhub /stock/candle."""
-        import math
         now = int(time.time())
         # Approximate: D=1 day, W=7 days, M=30 days per candle
         days_per_candle = {"D": 1, "W": 7, "M": 30}.get(resolution, 1)

@@ -23,7 +23,7 @@ type AnalysisSummary = {
   hhi: number
 }
 
-type Learningsuggestion = {
+type LearningSuggestion = {
   lesson_slug: string
   reason: string
 }
@@ -41,7 +41,7 @@ type Concentration = {
   }>
   risk_flags: string[]
   educational_feedback: string
-  learning_suggestions?: Learningsuggestion[]
+  learning_suggestions?: LearningSuggestion[]
 }
 
 const VOLATILITY_COLORS: Record<string, string> = {
