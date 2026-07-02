@@ -7,8 +7,11 @@ const primaryLinks = [
   ['/dashboard', 'Dashboard'],
   ['/ask-ai', 'Ask AI'],
   ['/portfolio-lab', 'Portfolio Lab'],
+  ['/market', 'Market'],
   ['/learn', 'Learn'],
-  ['/profile', 'Profile'],
+  ['/quest', 'Investor Quest'],
+  ['/billing', 'Billing'],
+  ['/profile', 'Account'],
 ]
 
 export function TopNav() {

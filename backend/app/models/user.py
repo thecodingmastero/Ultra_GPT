@@ -19,5 +19,9 @@ class User(db.Model):
 
     portfolios = relationship("Portfolio", back_populates="user", cascade="all, delete-orphan")
     watchlists = relationship("Watchlist", back_populates="user", cascade="all, delete-orphan")
+    watchlist_items = relationship("WatchlistItem", back_populates="user", cascade="all, delete-orphan")
     chat_sessions = relationship("ChatSession", back_populates="user", cascade="all, delete-orphan")
     lesson_progress = relationship("LessonProgress", back_populates="user", cascade="all, delete-orphan")
+    behavior_events = relationship("BehaviorEvent", back_populates="user", cascade="all, delete-orphan")
+    quest_profile = relationship("QuestProfile", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    subscription_status = relationship("SubscriptionStatus", back_populates="user", uselist=False, cascade="all, delete-orphan")

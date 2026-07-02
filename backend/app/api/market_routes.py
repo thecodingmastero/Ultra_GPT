@@ -30,6 +30,47 @@ def get_quote():
     return jsonify(quote)
 
 
+@market_bp.get("/quote/<string:ticker>")
+def get_quote_by_ticker(ticker: str):
+    """Path-param variant of the quote endpoint: GET /api/market/quote/:ticker"""
+    symbol = ticker.strip().upper()
+    if not symbol:
+        return jsonify({"error": "A ticker path parameter is required."}), 400
+
+    try:
+        quote = get_market_data_service().get_quote(symbol)
+    except MarketDataProviderError as exc:
+        current_app.logger.warning("Market quote lookup failed for %s: %s", symbol, exc)
+        return jsonify({"error": _format_market_error_message(exc)}), 502
+
+    return jsonify(quote)
+
+
+@market_bp.get("/chart/<string:ticker>")
+def get_chart(ticker: str):
+    """Stub chart endpoint — full OHLCV data integration deferred to Phase 2B.
+
+    Returns a placeholder response so the frontend can wire up the route now
+    and replace the stub payload once the data provider supports candlestick
+    chart data.
+    """
+    symbol = ticker.strip().upper()
+    if not symbol:
+        return jsonify({"error": "A ticker path parameter is required."}), 400
+
+    return jsonify(
+        {
+            "symbol": symbol,
+            "chart_data": [],
+            "message": "Chart data integration is planned for Phase 2B.",
+            "disclaimer": (
+                "The Better Investor is for educational purposes only and "
+                "does not provide personalized financial advice."
+            ),
+        }
+    )
+
+
 @market_bp.get("/profile")
 def get_profile():
     symbol = request.args.get("symbol", "").strip().upper()

@@ -3,6 +3,7 @@ import { ProtectedRoute } from '../components/auth/ProtectedRoute'
 import { AppShell } from '../components/layout/AppShell'
 import { AssistantPage } from '../pages/AssistantPage'
 import { DashboardPage } from '../pages/DashboardPage'
+import { InvestorQuestPage } from '../pages/InvestorQuestPage'
 import { LandingPage } from '../pages/LandingPage'
 import { LearnPage } from '../pages/LearnPage'
 import { LoginPage } from '../pages/LoginPage'
@@ -39,6 +40,7 @@ export const router = createBrowserRouter([
       },
       { path: 'market', element: <MarketPage /> },
       { path: 'learn', element: <LearnPage /> },
+      { path: 'quest', element: <InvestorQuestPage /> },
       {
         path: 'profile',
         element: (
@@ -56,6 +58,7 @@ export const router = createBrowserRouter([
         ),
       },
       { path: 'pricing', element: <PricingPage /> },
+      { path: 'billing', element: <PricingPage /> },
       { path: 'login', element: <LoginPage /> },
       { path: 'register', element: <RegisterPage /> },
     ],
