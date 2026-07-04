@@ -9,6 +9,7 @@ from backend.app.repositories.holdings_repository import HoldingsRepository
 from backend.app.repositories.lessons_repository import LessonsRepository
 from backend.app.services.ai.providers.openai_provider import OpenAIProvider
 from backend.app.services.ai.service import AssistantService
+from backend.app.services.behavioral.signals import BehavioralSignalService
 from backend.app.services.market_data.service import MarketDataService
 from backend.app.services.portfolio.analyzer import PortfolioAnalyzer
 
@@ -40,8 +41,16 @@ def get_market_data_provider():
     raise ValueError(f"Unsupported market data provider: {provider_name}")
 
 
+def get_behavioral_signal_service() -> BehavioralSignalService:
+    return BehavioralSignalService()
+
+
 def get_assistant_service() -> AssistantService:
-    return AssistantService(provider=get_ai_provider(), policy=AssistantPolicy())
+    return AssistantService(
+        provider=get_ai_provider(),
+        policy=AssistantPolicy(),
+        behavioral_signal_service=get_behavioral_signal_service(),
+    )
 
 
 def get_market_data_service() -> MarketDataService:
