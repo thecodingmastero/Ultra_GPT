@@ -37,6 +37,10 @@ def create_app(config_object: type[Config] = Config) -> Flask:
     jwt.init_app(app)
     cors.init_app(app, resources={r"/api/*": {"origins": "*"}})
 
+    @app.get("/")
+    def healthcheck() -> dict[str, str]:
+        return {"status": "ok", "app": "TheBetterInvestor"}
+
     for blueprint in BLUEPRINTS:
         app.register_blueprint(blueprint)
 
