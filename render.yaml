@@ -33,6 +33,23 @@ services:
       - key: OPENAI_MODEL
         value: gpt-4.1-mini
 
+  # ── FastAPI backend ── lightweight chat/health service
+  - type: web
+    name: ultra-gpt-fastapi
+    env: python
+    plan: free
+    rootDir: fastapi_backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+      # Add OPENAI_API_KEY here if you wire up a real AI provider:
+      # - key: OPENAI_API_KEY
+      #   sync: false
+
   # ── Frontend ── React/Vite static site
   - type: web
     name: thebetterinvestor-frontend

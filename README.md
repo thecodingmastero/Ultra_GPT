@@ -270,6 +270,7 @@ This project ships with a `render.yaml` that defines **two Render services**:
 | Service | Type | Name |
 |---|---|---|
 | Flask backend | Web Service (Python) | `thebetterinvestor-backend` |
+| FastAPI backend | Web Service (Python) | `ultra-gpt-fastapi` |
 | React/Vite frontend | Static Site | `thebetterinvestor-frontend` |
 
 ### Step-by-step
@@ -322,6 +323,77 @@ flask --app main:app run --debug
 ```
 
 Backend runs at `http://127.0.0.1:5000`.
+
+## 2) FastAPI backend (lightweight chat service)
+
+A minimal FastAPI service lives in `fastapi_backend/`. It exposes the two core
+endpoints needed by the frontend and can be deployed as its own Render Web
+Service.
+
+### Local run
+
+```bash
+cd fastapi_backend
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
+
+The service will be available at `http://localhost:8000`.
+
+Interactive docs (Swagger UI): `http://localhost:8000/docs`
+
+### Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/health` | Returns `{"ok": true, "service": "ultra-gpt-fastapi"}` |
+| `POST` | `/chat` | Accepts `{"message": "…"}`, returns `{"reply": "…"}` |
+
+### Environment variables
+
+No required environment variables for the stub implementation.  
+When you wire up a real AI provider, add `OPENAI_API_KEY` (or your provider's
+key) and read it with `os.environ.get("OPENAI_API_KEY")` inside
+`fastapi_backend/app/main.py`.
+
+### Deploying to Render
+
+The `render.yaml` in the repository root already defines the service
+`ultra-gpt-fastapi`:
+
+```yaml
+- type: web
+  name: ultra-gpt-fastapi
+  rootDir: fastapi_backend
+  buildCommand: pip install -r requirements.txt
+  startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+  healthCheckPath: /health
+```
+
+Steps:
+
+1. Connect the repo in the Render dashboard → *New → Blueprint*.
+2. Render detects `render.yaml` and creates the service automatically.
+3. After deploy, your FastAPI service URL will be something like
+   `https://ultra-gpt-fastapi.onrender.com`.
+4. Point your frontend at the service:
+
+```ts
+// In your frontend — e.g. src/services/http.ts or a .env variable
+const FASTAPI_BASE_URL = "https://ultra-gpt-fastapi.onrender.com";
+
+// Example chat call
+await fetch(`${FASTAPI_BASE_URL}/chat`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ message: userInput }),
+});
+```
+
+CORS is pre-configured to allow `https://thebetterinvestor.onrender.com`,
+`http://localhost:3000`, and `http://localhost:5173`.
 
 ## 2) Frontend (React + TypeScript)
 
