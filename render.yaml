@@ -1,8 +1,57 @@
 services:
+  # ── Backend ── Python/Flask web service
   - type: web
-    name: ultra-gpt
+    name: thebetterinvestor-backend
     env: python
     plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: python main.py
+    rootDir: .
+    buildCommand: pip install -r requirements.txt && flask --app main:app db upgrade -d backend/migrations
+    startCommand: gunicorn --bind 0.0.0.0:$PORT main:app
+    healthCheckPath: /
     autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      # WARNING: SQLite is ephemeral on Render — every deploy wipes the database.
+      # Set DATABASE_URL to a Render Postgres connection string before using in production:
+      #   postgresql://<user>:<password>@<host>/<db>
+      - key: DATABASE_URL
+        value: sqlite:///instance/better_investor.db
+      - key: AI_PROVIDER
+        value: stub
+      - key: MARKET_DATA_PROVIDER
+        value: finnhub
+      # Set these in the Render dashboard — do not commit real keys:
+      - key: FINNHUB_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4.1-mini
+
+  # ── Frontend ── React/Vite static site
+  - type: web
+    name: thebetterinvestor-frontend
+    env: static
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    autoDeploy: true
+    envVars:
+      # Point the frontend at the backend service URL.
+      # Replace with the actual Render URL of the backend service above.
+      - key: VITE_API_BASE_URL
+        sync: false
